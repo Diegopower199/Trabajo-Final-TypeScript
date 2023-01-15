@@ -1,6 +1,6 @@
 import { ObjectId } from "mongo";
 import { UsuarioCollection } from "../db/dbconnection.ts";
-import { UsuarioSchema } from "../db/schema.ts";
+import { PostSchema, UsuarioSchema } from "../db/schema.ts";
 import { TipoUsuario, Usuario } from "../types.ts";
 import * as bcrypt from "bcrypt";
 import { createJWT } from "../lib/jwt.ts";
@@ -13,8 +13,8 @@ export const Mutation = {
       password: string;
       name: string;
       surname: string;
-      tipoUsuario: TipoUsuario
-    }
+      tipoUsuario: TipoUsuario;
+    },
   ): Promise<UsuarioSchema & { token: string }> => {
     try {
       const user: UsuarioSchema | undefined = await UsuarioCollection.findOne({
@@ -35,7 +35,7 @@ export const Mutation = {
           fechaCreacion: fecha,
           id: _id.toString(),
         },
-        Deno.env.get("JWT_SECRET")!
+        Deno.env.get("JWT_SECRET")!,
       );
       const newUser: UsuarioSchema = {
         _id,
@@ -43,7 +43,8 @@ export const Mutation = {
         password: hashedPassword,
         name: args.name,
         surname: args.surname,
-        tipoUsuario: args.tipoUsuario
+        tipoUsuario: args.tipoUsuario,
+        fechaCreacion: fecha,
       };
       await UsuarioCollection.insertOne(newUser);
       return {
@@ -59,32 +60,55 @@ export const Mutation = {
     args: {
       username: string;
       password: string;
-    }
+    },
   ): Promise<string> => {
     try {
-      const user: UserSchema | undefined = await UsersCollection.findOne({
+      const user: UsuarioSchema | undefined = await UsuarioCollection.findOne({
         username: args.username,
       });
       if (!user) {
         throw new Error("User does not exist");
       }
-      const validPassword = await bcrypt.compare(args.password, user.password);
+      
+      let validPassword: boolean;
+
+      if (user.password) {
+        validPassword = await bcrypt.compare(args.password, user.password);
+      } 
+      
+      else {
+        validPassword = false;
+      }
+
+
       if (!validPassword) {
         throw new Error("Invalid password");
       }
+      
       const token = await createJWT(
         {
           username: user.username,
-          email: user.email,
           name: user.name,
           surname: user.surname,
+          tipoUsuario: user.tipoUsuario,
+          fechaCreacion: user.fechaCreacion,
           id: user._id.toString(),
         },
-        Deno.env.get("JWT_SECRET")!
+        Deno.env.get("JWT_SECRET")!,
       );
       return token;
     } catch (e) {
       throw new Error(e);
+    }
+  },
+
+  crearPost: async (_: unknown, args: { titular: string, cuerpo: string },): Promise<PostSchema> => {
+    try {
+
+    }
+
+    catch (e) {
+        throw new Error(e);
     }
   },
 };

@@ -12,22 +12,24 @@ export type Usuario = {
   password?: string;
   token?: string;
   fechaCreacion: Date;
-  comentariosCreados?: string[];
+  comentariosCreados?: string[],
   postCreados?: string[];
-  tipoUsuario: TipoUsuario
+  tipoUsuario: TipoUsuario,
 };
 
 export type Post = {
-  id: string;
-  creadorPost: string;
-  titular: string;
-  cuerpoPost: string;
-  fechaCreacion: Date;
+  id: string,
+  creadorPost: string,
+  titular: string,
+  cuerpoPost: string,
+  fechaCreacion: Date,
+  comentariosPost?: string[],
 };
 
 export type Comentarios = {
   id: string,
   creadorComentario: string,
+  postOrigen: string,
   contenido: string,
   fechaCreacion: Date,
 };
