@@ -5,15 +5,15 @@ export enum TipoUsuario {
 
 
 export type Usuario = {
-  id: string;
-  username: string;
-  name: string;
-  surname: string;
-  password?: string;
-  token?: string;
-  fechaCreacion: Date;
+  id: string,
+  username: string,
+  name: string,
+  surname: string,
+  password?: string,
+  token?: string,
+  fechaCreacion: Date,
   comentariosCreados?: string[],
-  postCreados?: string[];
+  postCreados?: string[],
   tipoUsuario: TipoUsuario,
 };
 
