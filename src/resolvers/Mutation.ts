@@ -1,7 +1,11 @@
 import { ObjectId } from "mongo";
-import { PostCollection, UsuarioCollection } from "../db/dbconnection.ts";
-import { PostSchema, UsuarioSchema } from "../db/schema.ts";
-import { TipoUsuario, Usuario } from "../types.ts";
+import {
+  ComentarioCollection,
+  PostCollection,
+  UsuarioCollection,
+} from "../db/dbconnection.ts";
+import { ComentariosSchema, PostSchema, UsuarioSchema } from "../db/schema.ts";
+import { TipoUsuario } from "../types.ts";
 import * as bcrypt from "bcrypt";
 import { createJWT } from "../lib/jwt.ts";
 
@@ -69,22 +73,19 @@ export const Mutation = {
       if (!user) {
         throw new Error("User does not exist");
       }
-      
+
       let validPassword: boolean;
 
       if (user.password) {
         validPassword = await bcrypt.compare(args.password, user.password);
-      } 
-      
-      else {
+      } else {
         validPassword = false;
       }
-
 
       if (!validPassword) {
         throw new Error("Invalid password");
       }
-      
+
       const token = await createJWT(
         {
           username: user.username,
@@ -102,43 +103,168 @@ export const Mutation = {
     }
   },
 
-  crearPost: async (_: unknown, args: { usuario_id: string, titular: string, cuerpo: string },): Promise<PostSchema> => {
+  crearPost: async (
+    _: unknown,
+    args: { usuario_id: string; titular: string; cuerpo: string },
+  ): Promise<PostSchema> => {
     try {
-        const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne( {
+      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection
+        .findOne({
+          _id: new ObjectId(args.usuario_id),
+        });
+
+      if (!usuarioExiste) {
+        throw new Error("El usuario no existe");
+      }
+
+      if (usuarioExiste.tipoUsuario !== "AUTOR") {
+        throw new Error(
+          "No puedes crear un post con ese tipo de usuario, solo se puede como autor",
+        );
+      }
+
+      const date = new Date();
+
+      const post: ObjectId = await PostCollection.insertOne({
+        creadorPost: new ObjectId(args.usuario_id),
+        titular: args.titular,
+        cuerpoPost: args.cuerpo,
+        fechaCreacion: date,
+        comentariosPost: [],
+      });
+
+      return {
+        _id: post,
+        creadorPost: new ObjectId(args.usuario_id),
+        titular: args.titular,
+        cuerpoPost: args.cuerpo,
+        fechaCreacion: date,
+        comentariosPost: [],
+      };
+    } catch (e) {
+      throw new Error(e);
+    }
+  },
+
+  crearComentarios: async (
+    _: unknown,
+    args: { usuario_id: string; post_id: string; contenido: string },
+  ): Promise<ComentariosSchema> => {
+    try {
+      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection
+        .findOne({
+          _id: new ObjectId(args.usuario_id),
+        });
+
+      if (!usuarioExiste) {
+        throw new Error("El usuario no existe");
+      }
+
+      const postExiste: PostSchema | undefined = await PostCollection.findOne({
+        _id: new ObjectId(args.post_id),
+      });
+
+      if (!postExiste) {
+        throw new Error("El post no existe");
+      }
+
+      const date = new Date();
+
+      const comentario: ObjectId = await ComentarioCollection.insertOne({
+        creadorComentario: new ObjectId(args.usuario_id),
+        postOrigen: new ObjectId(args.post_id),
+        contenido: args.contenido,
+        fechaCreacion: date,
+      });
+
+      return {
+        _id: comentario,
+        creadorComentario: new ObjectId(args.usuario_id),
+        postOrigen: new ObjectId(args.post_id),
+        contenido: args.contenido,
+        fechaCreacion: date,
+      };
+    } catch (e) {
+      throw new Error(e);
+    }
+  },
+
+  updatePost: async (
+    _: unknown,
+    args: {
+      usuario_id: string;
+      post_id: string;
+      titular?: string;
+      cuerpoPost?: string;
+    },
+  ): Promise<PostSchema> => {
+    try {
+      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne({
+          _id: new ObjectId(args.usuario_id),
+        });
+
+      if (!usuarioExiste) {
+        throw new Error("El usuario no existe");
+      }
+
+      const _id = new ObjectId(args.post_id);
+      const post = await PostCollection.updateOne(
+        { _id },
+        {
+            $set: {
+                titular: args.titular,
+                cuerpoPost: args.cuerpoPost,
+            },
+        }
+      );
+
+      if (post.matchedCount === 0) {
+        throw new Error("No se ha encontrado el post")
+      }
+
+      return (await PostCollection.findOne({
+        _id,
+      })) as PostSchema;
+
+    } 
+    
+    catch (e) {
+      throw new Error(e);
+    }
+  },
+
+  updateComentarios: async (_: unknown, args: {usuario_id: string; comentario_id: string, contenido: string}, ): Promise<ComentariosSchema> => { 
+    try {
+        const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne({
             _id: new ObjectId(args.usuario_id),
-        });
-
+          });
+  
         if (!usuarioExiste) {
-            throw new Error("El usuario no existe");
+          throw new Error("El usuario no existe");
         }
-
-        if (usuarioExiste.tipoUsuario !== "AUTOR") {
-            throw new Error ("No puedes crear un post con ese tipo de usuario, solo se puede como autor");
+  
+        const _id = new ObjectId(args.comentario_id);
+        const comentario = await ComentarioCollection.updateOne(
+          { _id },
+          {
+              $set: {
+                  contenido: args.contenido
+              },
+          }
+        );
+  
+        if (comentario.matchedCount === 0) {
+          throw new Error("No se ha encontrado el comentario")
         }
-
-        const date = new Date ();
-
-        const post: ObjectId = await PostCollection.insertOne ({
-            creadorPost: new ObjectId(args.usuario_id),
-            titular: args.titular,
-            cuerpoPost: args.cuerpo,
-            fechaCreacion: date,
-            comentariosPost: [],
-        });
-
-        return {
-            _id: post,
-            creadorPost: new ObjectId(args.usuario_id),
-            titular: args.titular,
-            cuerpoPost: args.cuerpo,
-            fechaCreacion: date,
-            comentariosPost: [],
-        }
-       
+  
+        return (await ComentarioCollection.findOne({
+          _id,
+        })) as ComentariosSchema;
     }
 
     catch (e) {
-        throw new Error(e);
+        throw new Error (e);
     }
-  },
+
+  }
 };
