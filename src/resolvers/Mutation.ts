@@ -1,5 +1,5 @@
 import { ObjectId } from "mongo";
-import { UsuarioCollection } from "../db/dbconnection.ts";
+import { PostCollection, UsuarioCollection } from "../db/dbconnection.ts";
 import { PostSchema, UsuarioSchema } from "../db/schema.ts";
 import { TipoUsuario, Usuario } from "../types.ts";
 import * as bcrypt from "bcrypt";
@@ -102,9 +102,39 @@ export const Mutation = {
     }
   },
 
-  crearPost: async (_: unknown, args: { titular: string, cuerpo: string },): Promise<PostSchema> => {
+  crearPost: async (_: unknown, args: { usuario_id: string, titular: string, cuerpo: string },): Promise<PostSchema> => {
     try {
+        const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne( {
+            _id: new ObjectId(args.usuario_id),
+        });
 
+        if (!usuarioExiste) {
+            throw new Error("El usuario no existe");
+        }
+
+        if (usuarioExiste.tipoUsuario !== "AUTOR") {
+            throw new Error ("No puedes crear un post con ese tipo de usuario, solo se puede como autor");
+        }
+
+        const date = new Date ();
+
+        const post: ObjectId = await PostCollection.insertOne ({
+            creadorPost: new ObjectId(args.usuario_id),
+            titular: args.titular,
+            cuerpoPost: args.cuerpo,
+            fechaCreacion: date,
+            comentariosPost: [],
+        });
+
+        return {
+            _id: post,
+            creadorPost: new ObjectId(args.usuario_id),
+            titular: args.titular,
+            cuerpoPost: args.cuerpo,
+            fechaCreacion: date,
+            comentariosPost: [],
+        }
+       
     }
 
     catch (e) {

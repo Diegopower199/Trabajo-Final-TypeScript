@@ -7,10 +7,10 @@ export type UsuarioSchema = Omit<Usuario, "id" | "token" | "comentariosCreados" 
     postCreados?: ObjectId[]
 };
 
-export type PostSchema = Omit<Post, "id" | "comentariosPost"> & {
+export type PostSchema = Omit<Post, "id" | "creadorPost" | "comentariosPost"> & {
     _id: ObjectId;
     creadorPost: ObjectId,
-    comentariosPost?: ObjectId[],
+    comentariosPost: ObjectId[],
 };
 
 export type ComentariosSchema = Omit<Comentarios, "id" | "creadorComentario" | "postOrigen"> & {

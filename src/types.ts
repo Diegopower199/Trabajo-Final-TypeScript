@@ -23,7 +23,7 @@ export type Post = {
   titular: string,
   cuerpoPost: string,
   fechaCreacion: Date,
-  comentariosPost?: string[],
+  comentariosPost: string[],
 };
 
 export type Comentarios = {

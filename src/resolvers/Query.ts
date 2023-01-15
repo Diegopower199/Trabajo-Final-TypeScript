@@ -25,6 +25,7 @@ export const Query = {
         titular: post.titular,
         cuerpoPost: post.cuerpoPost,
         fechaCreacion: post.fechaCreacion,
+        comentariosPost: post.comentariosPost,
       }));
     } catch (e) {
       throw new Error(e);
