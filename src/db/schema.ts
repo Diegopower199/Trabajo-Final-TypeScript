@@ -1,5 +1,5 @@
 import { ObjectId } from "mongo";
-import { Usuario, Post, Comentarios } from "../types.ts";
+import { Usuario, Post, Comentario } from "../types.ts";
 
 export type UsuarioSchema = Omit<Usuario, "id" | "token" | "comentariosCreados" | "postCreados"> & {
     _id: ObjectId;
@@ -13,7 +13,7 @@ export type PostSchema = Omit<Post, "id" | "creadorPost" | "comentariosPost"> & 
     comentariosPost: ObjectId[],
 };
 
-export type ComentariosSchema = Omit<Comentarios, "id" | "creadorComentario" | "postOrigen"> & {
+export type ComentariosSchema = Omit<Comentario, "id" | "creadorComentario" | "postOrigen"> & {
     _id: ObjectId;
     creadorComentario: ObjectId,
     postOrigen: ObjectId,

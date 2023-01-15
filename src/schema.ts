@@ -1,52 +1,51 @@
 import { gql } from "graphql_tag";
 
 export const typeDefs = gql`
+
+enum TipoUsuario {
+  REGISTRADO
+  AUTOR
+}
+
 type Usuario {
   id: ID!
-  name: String!
   username: String!
-  fechaCreacion: String!
+  name: String!
+  surname: String!
   token: String
+  fechaCreacion: String!
+  comentariosCreados: [Comentario!]
+  postCreados: [Post!]
+  tipoUsuario: TipoUsuario
+}
+
+type Post {
+  id: ID!
+  creadorPost: ID!
+  titular: String!
+  cuerpoPost: String!
+  fechaCreacion: String!
+  comentariosPost: [Comentario!]
+}
+
+type Comentario {
+  id: ID!,
+  creadorComentario: ID!,
+  postOrigen: ID!,
+  contenido: String!,
+  fechaCreacion: String!,
 }
 
 type Query {
-  getMessages(page: Int!, perPage: Int!): [Mensaje!]!
+  leerPosts(titulo: String!, autor: ID!): [Post!]!
+  leerComentarios(post_id: String): [Comentario!]!
 }
 type Mutation {
-  createUser(username: String!, password: String!): Usuario!
+  register(username: String!, password: String!, name: String!, surname: String!, tipoUsuario: TipoUsuario!): Usuario!
   login(username: String!, password: String!): String!
-  deleteUser: Usuario!
-  sendMessage(destinatario: String!, menssage: String!): Mensaje!
+  crearPost(usuario_id: String!, titular: String!, cuerpo: String!): Post!
+  crearComentarios(usuario_id: String!, post_id: String!, contenido: String): Comentario!
+  updatePost(usuario_id: String!, post_id: String!, titular: String!, cuerpoPost: String): Post!
+  updateComentarios(usuario_id: String!, comentario_id: String!, contenido: String!): Comentario!
 }
 `;
-
-/*
-export type Usuario = {
-  id: string;
-  username: string;
-  name: string;
-  surname: string;
-  password?: string;
-  token?: string;
-  fechaCreacion: Date;
-  comentariosCreados?: string[];
-  postCreados?: string[];
-  tipoUsuario: TipoUsuario
-};
-
-export type Post = {
-  id: string;
-  creadorPost: string;
-  titular: string;
-  cuerpoPost: string;
-  fechaCreacion: Date;
-  comentariosPost?: string[],
-};
-
-export type Comentarios = {
-  id: string,
-  creadorComentario: string,
-  postOrigen: string,
-  contenido: string,
-  fechaCreacion: Date,
-};*/

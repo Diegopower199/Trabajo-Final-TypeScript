@@ -177,6 +177,18 @@ export const Mutation = {
         fechaCreacion: date,
       });
 
+      
+      await PostCollection.updateOne(
+        { _id: new ObjectId(postExiste._id) },
+        {
+          $push: {
+            comentariosPost: {
+              $each: [new ObjectId(comentario)],
+            },
+          },
+        },
+      );
+
       return {
         _id: comentario,
         creadorComentario: new ObjectId(args.usuario_id),
@@ -199,7 +211,8 @@ export const Mutation = {
     },
   ): Promise<PostSchema> => {
     try {
-      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne({
+      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection
+        .findOne({
           _id: new ObjectId(args.usuario_id),
         });
 
@@ -211,60 +224,58 @@ export const Mutation = {
       const post = await PostCollection.updateOne(
         { _id },
         {
-            $set: {
-                titular: args.titular,
-                cuerpoPost: args.cuerpoPost,
-            },
-        }
+          $set: {
+            titular: args.titular,
+            cuerpoPost: args.cuerpoPost,
+          },
+        },
       );
 
       if (post.matchedCount === 0) {
-        throw new Error("No se ha encontrado el post")
+        throw new Error("No se ha encontrado el post");
       }
 
       return (await PostCollection.findOne({
         _id,
       })) as PostSchema;
-
-    } 
-    
-    catch (e) {
+    } catch (e) {
       throw new Error(e);
     }
   },
 
-  updateComentarios: async (_: unknown, args: {usuario_id: string; comentario_id: string, contenido: string}, ): Promise<ComentariosSchema> => { 
+  updateComentarios: async (
+    _: unknown,
+    args: { usuario_id: string; comentario_id: string; contenido: string },
+  ): Promise<ComentariosSchema> => {
     try {
-        const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection.findOne({
-            _id: new ObjectId(args.usuario_id),
-          });
-  
-        if (!usuarioExiste) {
-          throw new Error("El usuario no existe");
-        }
-  
-        const _id = new ObjectId(args.comentario_id);
-        const comentario = await ComentarioCollection.updateOne(
-          { _id },
-          {
-              $set: {
-                  contenido: args.contenido
-              },
-          }
-        );
-  
-        if (comentario.matchedCount === 0) {
-          throw new Error("No se ha encontrado el comentario")
-        }
-  
-        return (await ComentarioCollection.findOne({
-          _id,
-        })) as ComentariosSchema;
-    }
+      const usuarioExiste: UsuarioSchema | undefined = await UsuarioCollection
+        .findOne({
+          _id: new ObjectId(args.usuario_id),
+        });
 
-    catch (e) {
-        throw new Error (e);
-    }
+      if (!usuarioExiste) {
+        throw new Error("El usuario no existe");
+      }
 
-  }
+      const _id = new ObjectId(args.comentario_id);
+      const comentario = await ComentarioCollection.updateOne(
+        { _id },
+        {
+          $set: {
+            contenido: args.contenido,
+          },
+        },
+      );
+
+      if (comentario.matchedCount === 0) {
+        throw new Error("No se ha encontrado el comentario");
+      }
+
+      return (await ComentarioCollection.findOne({
+        _id,
+      })) as ComentariosSchema;
+    } catch (e) {
+      throw new Error(e);
+    }
+  },
 };

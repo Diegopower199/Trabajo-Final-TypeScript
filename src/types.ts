@@ -26,7 +26,7 @@ export type Post = {
   comentariosPost: string[],
 };
 
-export type Comentarios = {
+export type Comentario = {
   id: string,
   creadorComentario: string,
   postOrigen: string,

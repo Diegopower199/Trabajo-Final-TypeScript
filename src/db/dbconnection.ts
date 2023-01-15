@@ -1,6 +1,7 @@
-import { MongoClient, Database } from "mongo";
+import { Database, MongoClient } from "mongo";
+
 import { config } from "std/dotenv/mod.ts";
-import { ComentariosSchema, PostSchema, UsuarioSchema } from "./schema.ts";
+import { UsuarioSchema, PostSchema, ComentariosSchema } from "./schema.ts";
 
 await config({ export: true, allowEmptyValues: true });
 
@@ -9,7 +10,15 @@ const connectMongoDB = async (): Promise<Database> => {
   const mongo_pwd = Deno.env.get("MONGO_PWD");
   const db_name = Deno.env.get("DB_NAME");
   const mongo_uri = Deno.env.get("MONGO_URI");
-  const mongo_url = `mongodb+srv://${mongo_usr}:${mongo_pwd}@${mongo_uri}/${db_name}?authMechanism=SCRAM-SHA-1`;
+
+  if (!mongo_usr || !mongo_pwd || !db_name || !mongo_uri) {
+    throw new Error(
+      "Missing environment variables, check env.sample for creating .env file",
+    );
+  }
+
+  const mongo_url =
+    `mongodb+srv://${mongo_usr}:${mongo_pwd}@${mongo_uri}/${db_name}?authMechanism=SCRAM-SHA-1`;
 
   const client = new MongoClient();
   await client.connect(mongo_url);
