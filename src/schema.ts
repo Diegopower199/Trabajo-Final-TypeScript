@@ -37,7 +37,7 @@ type Comentario {
 }
 
 type Query {
-  leerPosts(titulo: String!, autor: ID!): [Post!]!
+  leerPosts(titulo: String!, usuarioCreadorPost: ID!): [Post!]!
   leerComentarios(post_id: String): [Comentario!]!
 }
 type Mutation {
@@ -49,3 +49,5 @@ type Mutation {
   updateComentarios(usuario_id: String!, comentario_id: String!, contenido: String!): Comentario!
 }
 `;
+
+// // TENGO QUE CAMBIAR LAS COSAS DE USUARIO_ID O POST_ID POR LOS TOKEN DE LOS USUARIOS 

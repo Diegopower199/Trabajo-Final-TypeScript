@@ -7,12 +7,12 @@ import { Usuario } from "../types.ts";
 export const Query = {
   leerPosts: async (
     parent: unknown,
-    args: { titulo: string; autor: string },
+    args: { titulo: string; usuarioCreadorPost: string },
   ): Promise<PostSchema[]> => {
     try {
       const postExiste: PostSchema[] | undefined = await PostCollection.find({
         titular: args.titulo,
-        creadorPost: new ObjectId(args.autor),
+        creadorPost: new ObjectId(args.usuarioCreadorPost),
       }).toArray();
 
       if (!postExiste) {

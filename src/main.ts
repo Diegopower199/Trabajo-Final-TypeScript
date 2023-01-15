@@ -20,6 +20,7 @@ const resolvers = {
   Post
 };
 
+// TENGO QUE CAMBIAR LAS COSAS DE USUARIO_ID O POST_ID POR LOS TOKEN DE LOS USUARIOS 
 const port = Number(Deno.env.get("PORT"));
 
 const s = new Server({
