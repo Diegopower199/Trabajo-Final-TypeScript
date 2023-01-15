@@ -1,0 +1,33 @@
+export enum TipoUsuario {
+  REGISTRADO = "REGISTRADO",
+  AUTOR = "AUTOR"
+}
+
+
+export type Usuario = {
+  id: string;
+  username: string;
+  name: string;
+  surname: string;
+  password?: string;
+  token?: string;
+  fechaCreacion: Date;
+  comentariosCreados?: string[];
+  postCreados?: string[];
+  tipoUsuario: TipoUsuario
+};
+
+export type Post = {
+  id: string;
+  creadorPost: string;
+  titular: string;
+  cuerpoPost: string;
+  fechaCreacion: Date;
+};
+
+export type Comentarios = {
+  id: string,
+  creadorComentario: string,
+  contenido: string,
+  fechaCreacion: Date,
+};
