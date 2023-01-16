@@ -3,7 +3,7 @@ import { Usuario, Post, Comentario } from "../types.ts";
 
 export type UsuarioSchema = Omit<Usuario, "id" | "token" | "comentariosCreados" | "postCreados"> & {
     _id: ObjectId;
-    comentariosCreados?: ObjectId[],
+    comentariosCreados: ObjectId[],
     postCreados?: ObjectId[]
 };
 

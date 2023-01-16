@@ -47,7 +47,15 @@ type Mutation {
   crearComentarios(usuario_id: String!, post_id: String!, contenido: String): Comentario!
   updatePost(usuario_id: String!, post_id: String!, titular: String!, cuerpoPost: String): Post!
   updateComentarios(usuario_id: String!, comentario_id: String!, contenido: String!): Comentario!
+  deletePost(usuario_id: String!, post_id: String!): Post!
+  deleteComentarios(usuario_id: String!, post_id: String!, comentario_id: String!): Comentario!
 }
 `;
+
+/*
+
+deletePost(): Post!
+  deleteComentarios(usuario_id: String!, comentario_id: String!,): Comentario!
+*/
 
 // // TENGO QUE CAMBIAR LAS COSAS DE USUARIO_ID O POST_ID POR LOS TOKEN DE LOS USUARIOS 
