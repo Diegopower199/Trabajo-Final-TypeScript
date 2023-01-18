@@ -5,7 +5,7 @@ import {
   UsuarioCollection,
 } from "../db/dbconnection.ts";
 import { ComentariosSchema, PostSchema, UsuarioSchema } from "../db/schema.ts";
-import { TipoUsuario } from "../types.ts";
+import { Comentario, TipoUsuario } from "../types.ts";
 import * as bcrypt from "bcrypt";
 import { createJWT } from "../lib/jwt.ts";
 
@@ -30,32 +30,68 @@ export const Mutation = {
       const hashedPassword = await bcrypt.hash(args.password);
       const _id = new ObjectId();
       const fecha = new Date();
-      const token = await createJWT(
-        {
+
+      if (args.tipoUsuario === "REGISTRADO") {
+        const token = await createJWT(
+          {
+            username: args.username,
+            name: args.name,
+            surname: args.surname,
+            tipoUsuario: args.tipoUsuario,
+            fechaCreacion: fecha,
+            comentariosCreados: [],
+            id: _id.toString(),
+          },
+          Deno.env.get("JWT_SECRET")!,
+        );
+        const newUser: UsuarioSchema = {
+          _id,
           username: args.username,
+          password: hashedPassword,
           name: args.name,
           surname: args.surname,
           tipoUsuario: args.tipoUsuario,
           fechaCreacion: fecha,
-          id: _id.toString(),
-        },
-        Deno.env.get("JWT_SECRET")!,
-      );
-      const newUser: UsuarioSchema = {
-        _id,
-        username: args.username,
-        password: hashedPassword,
-        name: args.name,
-        surname: args.surname,
-        tipoUsuario: args.tipoUsuario,
-        fechaCreacion: fecha,
-        comentariosCreados: [],
-      };
-      await UsuarioCollection.insertOne(newUser);
-      return {
-        ...newUser,
-        token,
-      };
+          comentariosCreados: [],
+        };
+        await UsuarioCollection.insertOne(newUser);
+        return {
+          ...newUser,
+          token,
+        };
+      }
+      else {
+        const token = await createJWT(
+          {
+            username: args.username,
+            name: args.name,
+            surname: args.surname,
+            tipoUsuario: args.tipoUsuario,
+            fechaCreacion: fecha,
+            comentariosCreados: [],
+            postCreados: [],
+            id: _id.toString(),
+          },
+          Deno.env.get("JWT_SECRET")!,
+        );
+        const newUser: UsuarioSchema = {
+          _id,
+          username: args.username,
+          password: hashedPassword,
+          name: args.name,
+          surname: args.surname,
+          tipoUsuario: args.tipoUsuario,
+          fechaCreacion: fecha,
+          comentariosCreados: [],
+          postCreados: [],
+        };
+        await UsuarioCollection.insertOne(newUser);
+        return {
+          ...newUser,
+          token,
+        };
+      }
+      
     } catch (e) {
       throw new Error(e);
     }
@@ -342,6 +378,24 @@ export const Mutation = {
         _id: new ObjectId(args.post_id),
       });
 
+      postExiste.comentariosPost.forEach( async (valorComentario:ObjectId) => {
+        await ComentarioCollection.deleteOne({
+          _id: new ObjectId(valorComentario)
+        })
+      })
+
+      postExiste.comentariosPost.forEach( async (valorComentario:ObjectId) => {
+        await UsuarioCollection.updateOne(
+          { _id: new ObjectId(args.usuario_id) },
+          {
+            $pull: {
+              comentariosCreados: new ObjectId(valorComentario),
+            },
+          },
+        );
+
+      })
+
       await UsuarioCollection.updateOne(
         { _id: new ObjectId(args.usuario_id) },
         {
@@ -350,6 +404,10 @@ export const Mutation = {
           },
         },
       );
+
+      
+
+
 
       return {  
         _id: postExiste._id,
