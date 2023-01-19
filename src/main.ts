@@ -16,7 +16,7 @@ const resolvers = {
   Query,
   Mutation,
   Comentario,
-  Usuario,
+  Usuario: Usuario,
   Post
 };
 
